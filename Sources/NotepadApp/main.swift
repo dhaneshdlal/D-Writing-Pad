@@ -218,6 +218,7 @@ private struct NotepadWebView: NSViewRepresentable {
             self.model = model
         }
 
+        @MainActor
         func userContentController(
             _ userContentController: WKUserContentController,
             didReceive message: WKScriptMessage
