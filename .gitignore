@@ -1,0 +1,17 @@
+# Build output and dependencies
+.build/
+dist/
+node_modules/
+
+# Generated runtime bundles and icons
+formatters.bundle.js
+manglish-dictionary.js
+AppIcon.icns
+icon.png
+
+# macOS and editor files
+.DS_Store
+.vscode/
+
+# npm logs
+npm-debug.log*

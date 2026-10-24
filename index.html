@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#17191f" />
+    <title>D-Writing-Pad</title>
+    <link rel="icon" type="image/png" href="icon.png" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="D-Writing-Pad home">
+          <span class="brand-icon" aria-hidden="true">D</span>
+          <span>D-Writing-Pad</span>
+        </a>
+        <div class="toolbar-group">
+          <div class="actions" aria-label="File actions">
+            <button class="toolbar-icon" id="open-button" type="button" aria-label="Open files" title="Open files (⌘O)">
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2.5 5.5h6l1.7 1.8h7.3v8.2H2.5z"/><path d="M2.5 7.3V4.5h5.2l1.7 1.8"/></svg>
+            </button>
+            <button class="toolbar-icon" id="save-button" type="button" aria-label="Save as" title="Save as (⌘S)">
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.5v9"/><path d="m6.5 8 3.5 3.5L13.5 8"/><path d="M3.5 12.5v4h13v-4"/></svg>
+            </button>
+            <button class="toolbar-icon" id="compare-button" type="button" aria-label="Compare notes" title="Compare notes">
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M9 3.5H4a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h5"/><path d="M11 3.5h5a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1h-5"/><path d="M10 2.5v15"/></svg>
+            </button>
+            <button class="toolbar-icon" id="wrap-button" type="button" aria-label="Toggle text wrapping" title="Text wrap: Off" aria-pressed="false">
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4.5h14"/><path d="M3 8.5h10a3 3 0 0 1 0 6h-2"/><path d="m13 11.5-2.5 3 2.5 2.5"/></svg>
+            </button>
+            <button class="toolbar-icon font-size-button" id="decrease-font-button" type="button" aria-label="Decrease font size" title="Decrease font size">A−</button>
+            <button class="toolbar-icon font-size-button" id="increase-font-button" type="button" aria-label="Increase font size" title="Increase font size">A+</button>
+            <button class="toolbar-icon manglish-button" id="manglish-button" type="button" aria-label="Toggle Manglish input" title="Manglish input: On (⌘M / Ctrl+M)" aria-pressed="true" hidden>മ</button>
+            <div class="plugin-menu-wrap">
+              <button class="toolbar-icon plugin-manager-button" id="plugins-button" type="button" aria-label="Open plugin manager" title="Open plugin manager" aria-haspopup="menu" aria-expanded="false">
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3.5H4.5a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V13"/><path d="M7 3.5h2v3H7z"/><path d="M11 3.5h2v3h-2z"/><path d="M7 9.5h2v3H7z"/><path d="M11 9.5h2v3h-2z"/></svg>
+                <span>Plugins</span>
+              </button>
+              <div class="plugin-menu" id="plugin-menu" role="menu" aria-label="Available plugins" hidden>
+                <div class="plugin-menu-heading" role="presentation">INPUT METHODS</div>
+                <div id="input-plugin-list"></div>
+                <div class="plugin-menu-empty" id="input-plugin-empty" role="presentation" hidden>No input methods are available.</div>
+                <div class="plugin-menu-heading" role="presentation">FORMAT NOTE</div>
+                <div id="formatter-plugin-list"></div>
+                <div class="plugin-menu-empty" id="formatter-plugin-empty" role="presentation" hidden>No formatters are available.</div>
+                <button class="plugin-menu-item plugin-help-button" id="plugin-help-button" type="button" role="menuitem">Develop a plugin…</button>
+              </div>
+            </div>
+            <input id="file-input" type="file" accept=".txt,.md,.text,text/plain,text/markdown" multiple hidden />
+          </div>
+        </div>
+      </header>
+
+      <section class="workspace" aria-label="Notepad workspace">
+        <div class="tabbar" id="tabbar" role="tablist" aria-label="Notes">
+          <button class="add-tab" id="new-button" type="button" aria-label="New note" title="New note">+</button>
+        </div>
+        <div class="compare-controls" id="compare-controls" hidden>
+          <span id="compare-hint">Select two notes to compare side by side.</span>
+          <div class="compare-actions">
+            <button class="button button-primary" id="compare-selected-button" type="button" disabled>Compare (0)</button>
+            <button class="button button-subtle" id="cancel-compare-button" type="button">Cancel</button>
+          </div>
+        </div>
+        <section class="compare-view" id="compare-view" aria-label="Side-by-side note comparison" hidden>
+          <div class="compare-legend" aria-label="Difference highlight colors">
+            <span><i class="diff-legend-swatch diff-left" aria-hidden="true"></i>Left note changes</span>
+            <span><i class="diff-legend-swatch diff-right" aria-hidden="true"></i>Right note changes</span>
+          </div>
+          <article class="compare-pane">
+            <h2 class="compare-title" id="compare-title-left"></h2>
+            <textarea class="compare-content" id="compare-content-left" aria-label="Left comparison note" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"></textarea>
+          </article>
+          <article class="compare-pane">
+            <h2 class="compare-title" id="compare-title-right"></h2>
+            <textarea class="compare-content" id="compare-content-right" aria-label="Right comparison note" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"></textarea>
+          </article>
+        </section>
+        <div class="editor-heading">
+          <input
+            class="note-title"
+            id="note-title"
+            type="text"
+            aria-label="Note name"
+            spellcheck="false"
+            maxlength="120"
+          />
+          <span class="save-indicator" id="save-indicator" aria-live="polite">
+            <span class="save-dot" aria-hidden="true"></span>
+            <span id="save-message">Saved on this Mac</span>
+          </span>
+        </div>
+        <div class="editor-wrap">
+          <div class="line-numbers" id="line-numbers" aria-hidden="true">1</div>
+          <textarea
+            id="editor"
+            class="editor"
+            aria-label="Note content"
+            placeholder="Start typing..."
+            spellcheck="false"
+            autocapitalize="off"
+            autocomplete="off"
+            autocorrect="off"
+          ></textarea>
+          <div class="manglish-suggestions" id="manglish-suggestions" role="listbox" aria-label="Malayalam word suggestions" hidden></div>
+        </div>
+        <footer class="statusbar">
+          <span id="status-message">All changes saved locally</span>
+          <div class="status-details">
+            <span id="line-count">Ln 1, Col 1</span>
+            <span class="status-divider" aria-hidden="true"></span>
+            <span id="character-count">0 characters</span>
+            <span class="status-divider" aria-hidden="true"></span>
+            <span>Plain text</span>
+          </div>
+        </footer>
+      </section>
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    </main>
+    <dialog class="plugin-guide-dialog" id="plugin-guide-dialog" aria-labelledby="plugin-guide-title">
+      <div class="plugin-guide-content">
+        <header class="plugin-guide-header">
+          <div>
+            <h2 id="plugin-guide-title">Develop a plugin</h2>
+            <p>Plugins can format a note or provide an input method, and run locally in the notepad.</p>
+          </div>
+          <button class="toolbar-icon plugin-guide-close" id="plugin-guide-close" type="button" aria-label="Close plugin guide" title="Close">×</button>
+        </header>
+        <ol class="plugin-guide-steps">
+          <li>Create a JavaScript file that calls <code>window.NotepadPlugins.register</code>.</li>
+          <li>Give it a unique <code>id</code> and a visible menu <code>name</code>.</li>
+          <li>For a formatter, add <code>format(content)</code> that returns formatted text. For an input method, add <code>type: "input"</code> and <code>getSuggestions(word)</code>.</li>
+          <li>Load the script after <code>app.js</code> in <code>index.html</code>, then reload the app. Your plugin appears under Input Methods or Format Note.</li>
+        </ol>
+        <pre class="plugin-guide-example"><code>window.NotepadPlugins.register({
+  id: "trim-lines",
+  name: "Trim each line",
+  format(content) {
+    return content
+      .split("\n")
+      .map((line) =&gt; line.trim())
+      .join("\n");
+  },
+});</code></pre>
+        <pre class="plugin-guide-example"><code>window.NotepadPlugins.register({
+  id: "my-input",
+  name: "My input method",
+  type: "input",
+  getSuggestions(word) {
+    return [{ kind: "word", label: word, value: word }];
+  },
+});</code></pre>
+        <p class="plugin-guide-note">An input plugin returns suggestion objects with <code>kind</code> ("word" or "letter"), <code>label</code>, and replacement <code>value</code>. A formatter receives note text, returns a string, and should throw when it cannot format. Review plugin code before loading it; plugins run with the app page's permissions.</p>
+      </div>
+    </dialog>
+    <script src="manglish-dictionary.js"></script>
+    <script src="manglish.js"></script>
+    <script src="app.js"></script>
+    <script src="formatters.bundle.js"></script>
+    <script src="manglish-plugin.js"></script>
+  </body>
+</html>

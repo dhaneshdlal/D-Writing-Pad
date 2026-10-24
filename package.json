@@ -1,0 +1,15 @@
+{
+  "name": "d-writing-pad",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build:formatters": "esbuild yaml-plugin.js --bundle --format=iife --target=es2020 --outfile=formatters.bundle.js",
+    "build:manglish-dictionary": "node scripts/build-manglish-dictionary.js"
+  },
+  "dependencies": {
+    "yaml": "^2.8.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}
