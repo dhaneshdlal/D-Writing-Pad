@@ -163,7 +163,7 @@ function createMenu() {
       label: "Input",
       submenu: [
         {
-          label: "Toggle Manglish Input",
+          label: "Toggle MaltoEng Input",
           accelerator: "Ctrl+M",
           click: () => sendEditorAction("#manglish-button"),
         },

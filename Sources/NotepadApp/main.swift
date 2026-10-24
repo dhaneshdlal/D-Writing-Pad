@@ -39,7 +39,7 @@ struct NotepadApp: App {
                 }
                 .keyboardShortcut("s", modifiers: .command)
 
-                Button("Toggle Manglish Input") {
+                Button("Toggle MaltoEng Input") {
                     model.runJavaScript("document.querySelector('#manglish-button').click()")
                 }
                 .keyboardShortcut("m", modifiers: .command)

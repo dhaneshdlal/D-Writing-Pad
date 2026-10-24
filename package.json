@@ -7,7 +7,7 @@
     "build:formatters": "esbuild yaml-plugin.js --bundle --format=iife --target=es2020 --outfile=formatters.bundle.js",
     "build:manglish-dictionary": "node scripts/build-manglish-dictionary.js",
     "start:windows": "electron .",
-    "build:windows": "npm run build:formatters && npm run build:manglish-dictionary && electron-builder --win nsis portable --x64"
+    "build:windows": "npm run build:formatters && npm run build:manglish-dictionary && electron-builder --win nsis portable --x64 --publish never"
   },
   "dependencies": {
     "yaml": "^2.8.1"

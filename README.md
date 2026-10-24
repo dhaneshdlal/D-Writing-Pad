@@ -14,7 +14,7 @@ The app bundle is built locally using the Swift compiler included with Xcode Com
 
 The script builds a universal app for Intel and Apple Silicon Macs running macOS 13 or later, then packages it in a compressed DMG with an Applications shortcut. Open the DMG and drag the app to Applications to install it. The app has native menu-bar commands and Open and Save dialogs; the About menu shows **Version 1.0**. Notes are stored on this Mac in the app's preferences. This local build is ad-hoc signed and is not notarized, so macOS may show a security warning when friends open it. Public distribution without that warning requires signing and notarization with an Apple Developer ID.
 
-The build script generates the offline formatter bundle, Manglish dictionary lookup, app's macOS icon (`AppIcon.icns`), and matching browser icon (`icon.png`). These generated files are not committed.
+The build script generates the offline formatter bundle, MaltoEng dictionary lookup, app's macOS icon (`AppIcon.icns`), and matching browser icon (`icon.png`). These generated files are not committed.
 
 ## Run it
 
@@ -29,17 +29,17 @@ The build script generates the offline formatter bundle, Manglish dictionary loo
 - **Compare** lets you select two note tabs, edit both notes side by side, and saves edits automatically. Different lines are highlighted in both panes (left changes in red, right changes in green), and the highlights update as you edit.
 - The top bar uses compact icons for Open, Save as, Compare, and text wrapping; hover over an icon to see its label. **Plugins** is labeled.
 - **Wrap** controls whether long lines wrap at the edge of the editor.
-- Enable **Manglish (Malayalam)** under **Plugins → Input Methods**, or press **⌘M** on Mac / **Ctrl+M** on Windows. The **മ** button appears only while Manglish is enabled; click it or use the same shortcut to turn Manglish off. Type a Romanized Malayalam word and press Space or punctuation to convert it to Malayalam script. The offline picker shows up to 10 matching dictionary words; if there are fewer, remaining choices are labeled **Letter** and offer alternate Malayalam letter/sound spellings. Choose by clicking, pressing **1–9** (or **0** for option 10), or using the arrow keys and Enter. Press **F2** to reopen choices for the last converted word.
+- Enable **MaltoEng (Malayalam)** under **Plugins → Input Methods**, or press **⌘M** on Mac / **Ctrl+M** on Windows. The **മ** button appears only while MaltoEng is enabled; click it or use the same shortcut to turn it off. Type a Romanized Malayalam word and press Space or punctuation to convert it to Malayalam script. The offline picker shows up to 10 matching dictionary words; if there are fewer, remaining choices are labeled **Letter** and offer alternate Malayalam letter/sound spellings. Choose by clicking, pressing **1–9** (or **0** for option 10), or using the arrow keys and Enter. Press **F2** to reopen choices for the last converted word.
 - **A−** and **A+** decrease or increase the editor and comparison text size. The chosen size is remembered.
 - Typing `(`, `[`, `{`, `"`, `'`, or a backtick automatically inserts its closing pair. Typing a closing character skips over its existing match; Backspace removes an empty pair.
-- **Plugins** opens the plugin manager. It contains Manglish under Input Methods and available formatters such as JSON and YAML. Formatters validate the note before changing it; invalid input is left unchanged. Choose **Develop a plugin…** in the menu for an in-app guide and example.
+- **Plugins** opens the plugin manager. It contains MaltoEng under Input Methods and available formatters such as JSON and YAML. Formatters validate the note before changing it; invalid input is left unchanged. Choose **Develop a plugin…** in the menu for an in-app guide and example.
 - Double-click a tab name to rename it, or edit the note name above the editor.
 - Use **⌘N** for a new note, **⌘O** to open files, **⌘S** to download the current note, and **⌘W** to close its tab.
 - **⌘Tab** and **⌘⇧Tab** switch between note tabs.
 
 When used in a browser, notes are stored in that browser's local storage. Clearing browser data can remove them, so use **Save as** for important copies. To prepare the generated files when opening the HTML directly, run `npm ci`, `npm run build:formatters`, and `npm run build:manglish-dictionary`.
 
-Manglish suggestions use an offline Malayalam Hunspell wordlist from [Swathanthra Malayalam Computing](https://github.com/smc/smc/tree/master/spellcheck/hunspell-ml). Its source files and license notices are in `data/malayalam-hunspell/`; the browser-ready lookup file is `manglish-dictionary.js`. Regenerate that file after changing the source wordlist with `npm run build:manglish-dictionary`. The SMC wordlist is GPL-3.0-or-later; see the included `Copyright` and `GPL-3.0.txt` files. The Mac app bundle includes these notices and the source wordlist.
+MaltoEng suggestions use an offline Malayalam Hunspell wordlist from [Swathanthra Malayalam Computing](https://github.com/smc/smc/tree/master/spellcheck/hunspell-ml). Its source files and license notices are in `data/malayalam-hunspell/`; the browser-ready lookup file is `manglish-dictionary.js`. Regenerate that file after changing the source wordlist with `npm run build:manglish-dictionary`. The SMC wordlist is GPL-3.0-or-later; see the included `Copyright` and `GPL-3.0.txt` files. The macOS app bundle includes these notices and the source wordlist.
 
 ## GitHub builds and publishing changes
 
@@ -47,7 +47,16 @@ Every push to the `dev` branch runs the **Build macOS app** and **Build Windows 
 
 To run the Windows app locally for development, install Node.js 22 or later, then run `npm ci` and `npm run start:windows`. To build both Windows `.exe` packages locally from Windows, run `npm run build:windows`.
 
-To publish stable downloads on the repository's **Releases** page, wait for both `dev` builds to succeed, download and extract their Actions artifacts, then choose **Releases → Draft a new release**. Create a version tag such as `v1.0.1` targeting `dev`, attach the `.dmg` and Windows `.exe` files (installer and portable build), add release notes, and publish. Actions artifacts are temporary build outputs; files attached to a published release are the lasting public downloads. Unsigned macOS and Windows apps may display operating-system security warnings.
+Pushing a version tag starting with `v` from the tested `dev` branch runs the release workflow. It builds both platforms and publishes a GitHub Release containing the macOS `.dmg` and `.zip`, plus the Windows installer and portable `.exe`:
+
+```sh
+git checkout dev
+git pull origin dev
+git tag -a v1.0.1 -m "D-Writing-Pad 1.0.1"
+git push origin v1.0.1
+```
+
+Use the next unused version tag. GitHub Actions artifacts are temporary; the files attached to a published Release have stable public download URLs. The apps are not code-signed/notarized, so macOS Gatekeeper and Windows SmartScreen may display security warnings.
 
 Clone the existing `dev` branch (this avoids creating a branch before the repository has a commit):
 
@@ -83,6 +92,6 @@ window.NotepadPlugins.register({
 });
 ```
 
-Input-method plugins provide `type: "input"` and `getSuggestions(word)`, returning choices with `kind`, `label`, and `value` properties. Selecting an input method in **Plugins** enables it; selecting it again disables it. Manglish is implemented this way in `manglish-plugin.js` and uses transliteration helpers from `manglish.js`.
+Input-method plugins provide `type: "input"` and `getSuggestions(word)`, returning choices with `kind`, `label`, and `value` properties. Selecting an input method in **Plugins** enables it; selecting it again disables it. MaltoEng is implemented this way in `manglish-plugin.js` and uses transliteration helpers from `manglish.js`.
 
 Add a script tag after `app.js` in `index.html`, then reload the app. The plugin appears in the **Plugins** manager. Keep plugins local and review code before loading; plugin code runs with the same page permissions as the app. For a distributable Mac build, add the plugin file to the resource copy list in `build-mac-app.sh`.

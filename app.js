@@ -536,7 +536,7 @@ function toggleInputPlugin(plugin, button) {
     button.setAttribute("aria-pressed", "false");
     button.classList.remove("active");
     manglishButton.setAttribute("aria-pressed", "false");
-    manglishButton.title = "Manglish input: Off (⌘M / Ctrl+M)";
+    manglishButton.title = "MaltoEng input: Off (⌘M / Ctrl+M)";
     manglishButton.hidden = true;
     closeManglishSuggestions();
     showToast(`${plugin.name} turned off.`);
@@ -551,10 +551,10 @@ function toggleInputPlugin(plugin, button) {
   activeInputPlugin = plugin;
   button.setAttribute("aria-pressed", "true");
   button.classList.add("active");
-  const isManglish = plugin.id === "manglish-input";
-  manglishButton.setAttribute("aria-pressed", String(isManglish));
-  manglishButton.title = `Manglish input: ${isManglish ? "On" : "Off"} (⌘M / Ctrl+M)`;
-  manglishButton.hidden = !isManglish;
+  const isMaltoEng = plugin.id === "manglish-input";
+  manglishButton.setAttribute("aria-pressed", String(isMaltoEng));
+  manglishButton.title = `MaltoEng input: ${isMaltoEng ? "On" : "Off"} (⌘M / Ctrl+M)`;
+  manglishButton.hidden = !isMaltoEng;
   showToast(`${plugin.name} on — press Space to convert; F2 reopens word choices.`);
   editor.focus();
 }
@@ -563,7 +563,7 @@ function toggleManglishInput() {
   const plugin = plugins.get("manglish-input");
   const button = inputPluginList.querySelector('[data-plugin-id="manglish-input"]');
   if (!plugin || !button) {
-    showToast("Manglish input plugin is unavailable.");
+    showToast("MaltoEng input plugin is unavailable.");
     return;
   }
   toggleInputPlugin(plugin, button);
