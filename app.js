@@ -130,7 +130,7 @@ function persistNotes() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
     }
     saveIndicator.classList.remove("unsaved");
-    saveMessage.textContent = "Saved on this Mac";
+    saveMessage.textContent = "Saved on this device";
     statusMessage.textContent = "All changes saved locally";
   } catch (error) {
     console.error("Unable to save notes:", error);

@@ -1,6 +1,6 @@
 # D-Writing-Pad
 
-A small, offline-friendly notepad for Mac. You can run it in a browser or build a standalone Mac app.
+An offline-friendly notepad. You can run it in a browser or build a standalone macOS or Windows app.
 
 ## Build the Mac app
 
@@ -43,7 +43,11 @@ Manglish suggestions use an offline Malayalam Hunspell wordlist from [Swathanthr
 
 ## GitHub builds and publishing changes
 
-Every push to the `dev` branch runs the **Build macOS app** workflow. To download the universal DMG, open the repository's **Actions** tab, select the latest successful run, and download the `D-Writing-Pad-macOS` artifact. You can also start the workflow manually from the Actions tab.
+Every push to the `dev` branch runs the **Build macOS app** and **Build Windows app** workflows. Download the universal DMG or Windows installer/portable `.exe` from the relevant successful run under the repository's **Actions** tab (`D-Writing-Pad-macOS` or `D-Writing-Pad-Windows` artifact). You can also start either workflow manually from the Actions tab.
+
+To run the Windows app locally for development, install Node.js 22 or later, then run `npm ci` and `npm run start:windows`. To build both Windows `.exe` packages locally from Windows, run `npm run build:windows`.
+
+To publish stable downloads on the repository's **Releases** page, wait for both `dev` builds to succeed, download and extract their Actions artifacts, then choose **Releases → Draft a new release**. Create a version tag such as `v1.0.1` targeting `dev`, attach the `.dmg` and Windows `.exe` files (installer and portable build), add release notes, and publish. Actions artifacts are temporary build outputs; files attached to a published release are the lasting public downloads. Unsigned macOS and Windows apps may display operating-system security warnings.
 
 Clone the existing `dev` branch (this avoids creating a branch before the repository has a commit):
 
