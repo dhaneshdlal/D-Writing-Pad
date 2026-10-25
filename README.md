@@ -2,6 +2,18 @@
 
 An offline-friendly notepad. You can run it in a browser or build a standalone macOS or Windows app.
 
+[![Build macOS and Windows apps](https://github.com/dhaneshdlal/D-Writing-Pad/actions/workflows/build-apps.yml/badge.svg?branch=dev)](https://github.com/dhaneshdlal/D-Writing-Pad/actions/workflows/build-apps.yml)
+[![Latest release](https://img.shields.io/github/v/release/dhaneshdlal/D-Writing-Pad?display_name=tag)](https://github.com/dhaneshdlal/D-Writing-Pad/releases/latest)
+
+## Download
+
+| Platform | Download |
+| --- | --- |
+| macOS (Universal) | [DMG installer](https://github.com/dhaneshdlal/D-Writing-Pad/releases/latest/download/D-Writing-Pad.dmg) · [ZIP app](https://github.com/dhaneshdlal/D-Writing-Pad/releases/latest/download/D-Writing-Pad-macOS.zip) |
+| Windows (64-bit) | [Installer](https://github.com/dhaneshdlal/D-Writing-Pad/releases/latest/download/D-Writing-Pad-Windows-Setup.exe) · [Portable app](https://github.com/dhaneshdlal/D-Writing-Pad/releases/latest/download/D-Writing-Pad-Windows-Portable.exe) |
+
+These links always point to the assets attached to the latest published GitHub Release. If no release has been published yet, [view all releases](https://github.com/dhaneshdlal/D-Writing-Pad/releases). Unsigned downloads may prompt a security warning; see the macOS Gatekeeper instructions below.
+
 ## Build the Mac app
 
 The app bundle is built locally using the Swift compiler included with Xcode Command Line Tools; the full Xcode app is not required.

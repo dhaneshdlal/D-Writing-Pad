@@ -42,10 +42,22 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build:windows
+      - name: Use stable Windows download names
+        shell: pwsh
+        run: |
+          $setup = Get-ChildItem dist/windows -Filter "*Setup*.exe" | Select-Object -First 1
+          $portable = Get-ChildItem dist/windows -Filter "*.exe" | Where-Object { $_.Name -notlike "*Setup*" } | Select-Object -First 1
+          if (-not $setup -or -not $portable) {
+            throw "Expected both Windows installer and portable executable in dist/windows."
+          }
+          Rename-Item $setup.FullName "D-Writing-Pad-Windows-Setup.exe"
+          Rename-Item $portable.FullName "D-Writing-Pad-Windows-Portable.exe"
       - uses: actions/upload-artifact@v4
         with:
           name: D-Writing-Pad-Windows
-          path: dist/windows/*.exe
+          path: |
+            dist/windows/D-Writing-Pad-Windows-Setup.exe
+            dist/windows/D-Writing-Pad-Windows-Portable.exe
           if-no-files-found: error
 
   publish-release:
