@@ -1,0 +1,56 @@
+{
+  "name": "d-writing-pad",
+  "version": "1.0.0",
+  "private": true,
+  "main": "electron/main.js",
+  "scripts": {
+    "build:formatters": "esbuild yaml-plugin.js --bundle --format=iife --target=es2020 --outfile=formatters.bundle.js",
+    "build:manglish-dictionary": "node scripts/build-manglish-dictionary.js",
+    "start:windows": "electron .",
+    "build:windows": "npm run build:formatters && npm run build:manglish-dictionary && electron-builder --win nsis portable --x64 --publish never"
+  },
+  "dependencies": {
+    "yaml": "^2.8.1"
+  },
+  "devDependencies": {
+    "electron": "^45.0.0",
+    "electron-builder": "^26.0.12",
+    "esbuild": "^0.25.0"
+  },
+  "build": {
+    "appId": "com.local.notepad",
+    "productName": "D-Writing-Pad",
+    "directories": {
+      "output": "dist/windows"
+    },
+    "files": [
+      "index.html",
+      "styles.css",
+      "app.js",
+      "manglish.js",
+      "manglish-plugin.js",
+      "manglish-dictionary.js",
+      "formatters.bundle.js",
+      "electron/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "data/malayalam-hunspell",
+        "to": "malayalam-hunspell"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  }
+}

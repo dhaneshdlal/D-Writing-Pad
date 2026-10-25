@@ -1,0 +1,81 @@
+name: Build macOS and Windows apps
+
+on:
+  push:
+    branches:
+      - dev
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: bash build-mac-app.sh
+      - name: Create macOS app archive
+        run: ditto -c -k --sequesterRsrc --keepParent dist/D-Writing-Pad.app dist/D-Writing-Pad-macOS.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: D-Writing-Pad-macOS
+          path: |
+            dist/D-Writing-Pad.dmg
+            dist/D-Writing-Pad-macOS.zip
+          if-no-files-found: error
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build:windows
+      - name: Use stable Windows download names
+        shell: pwsh
+        run: |
+          $setup = Get-ChildItem dist/windows -Filter "*Setup*.exe" | Select-Object -First 1
+          $portable = Get-ChildItem dist/windows -Filter "*.exe" | Where-Object { $_.Name -notlike "*Setup*" } | Select-Object -First 1
+          if (-not $setup -or -not $portable) {
+            throw "Expected both Windows installer and portable executable in dist/windows."
+          }
+          Rename-Item $setup.FullName "D-Writing-Pad-Windows-Setup.exe"
+          Rename-Item $portable.FullName "D-Writing-Pad-Windows-Portable.exe"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: D-Writing-Pad-Windows
+          path: |
+            dist/windows/D-Writing-Pad-Windows-Setup.exe
+            dist/windows/D-Writing-Pad-Windows-Portable.exe
+          if-no-files-found: error
+
+  publish-release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs:
+      - build-macos
+      - build-windows
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: D-Writing-Pad-*
+          path: release-assets
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*
+          generate_release_notes: true
+          fail_on_unmatched_files: true

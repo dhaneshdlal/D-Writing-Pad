@@ -1,2 +1,124 @@
 # D-Writing-Pad
-A sinple notepad for Mac and Windows 
+
+An offline-friendly notepad. You can run it in a browser or build a standalone macOS or Windows app.
+
+[![Build macOS and Windows apps](https://github.com/dhaneshdlal/D-Writing-Pad/actions/workflows/build-apps.yml/badge.svg?branch=dev)](https://github.com/dhaneshdlal/D-Writing-Pad/actions/workflows/build-apps.yml)
+[![Latest release](https://img.shields.io/github/v/release/dhaneshdlal/D-Writing-Pad?display_name=tag)](https://github.com/dhaneshdlal/D-Writing-Pad/releases/latest)
+
+## Download
+
+| Platform | Download |
+| --- | --- |
+| macOS (Universal) | [DMG installer](https://github.com/dhaneshdlal/D-Writing-Pad/releases/latest/download/D-Writing-Pad.dmg) · [ZIP app](https://github.com/dhaneshdlal/D-Writing-Pad/releases/latest/download/D-Writing-Pad-macOS.zip) |
+| Windows (64-bit) | [Installer](https://github.com/dhaneshdlal/D-Writing-Pad/releases/latest/download/D-Writing-Pad-Windows-Setup.exe) · [Portable app](https://github.com/dhaneshdlal/D-Writing-Pad/releases/latest/download/D-Writing-Pad-Windows-Portable.exe) |
+
+These links always point to the assets attached to the latest published GitHub Release. If no release has been published yet, [view all releases](https://github.com/dhaneshdlal/D-Writing-Pad/releases). Unsigned downloads may prompt a security warning; see the macOS Gatekeeper instructions below.
+
+## Build the Mac app
+
+The app bundle is built locally using the Swift compiler included with Xcode Command Line Tools; the full Xcode app is not required.
+
+1. Install Node.js 22 or later and Xcode Command Line Tools.
+2. Open Terminal in this folder.
+3. Run `npm ci`.
+4. Run `bash build-mac-app.sh`.
+5. Share `dist/D-Writing-Pad.dmg` with your friend, or open `dist/D-Writing-Pad.app` directly.
+
+The script builds a universal app for Intel and Apple Silicon Macs running macOS 13 or later, then packages it in a compressed DMG with an Applications shortcut. Open the DMG and drag the app to Applications to install it. The app has native menu-bar commands and Open and Save dialogs; the About menu shows **Version 1.0**. Notes are stored on this Mac in the app's preferences. This local build is ad-hoc signed and is not notarized, so macOS may show a security warning when friends open it. Public distribution without that warning requires signing and notarization with an Apple Developer ID.
+
+### If macOS blocks the app
+
+The app is not signed with an Apple Developer ID or notarized by Apple. Only bypass Gatekeeper if you trust the source of the download. After you have tried opening the app and macOS blocks it:
+
+1. Open the Apple menu and choose **System Settings**.
+2. Select **Privacy & Security** in the sidebar. Scroll to the **Security** section.
+3. Click **Open Anyway** for D-Writing-Pad. This button is available for about an hour after the blocked launch attempt.
+4. Confirm **Open Anyway** in the prompt, then enter your Mac login password if requested.
+
+The override is a user choice, not an Apple verification of the app. If the **Open Anyway** button is not shown, try opening the app again, then return to **Privacy & Security**.
+
+The build script generates the offline formatter bundle, MaltoEng dictionary lookup, app's macOS icon (`AppIcon.icns`), and matching browser icon (`icon.png`). These generated files are not committed.
+
+## Run it
+
+1. Keep `index.html`, `styles.css`, `app.js`, `manglish.js`, `manglish-plugin.js`, and `manglish-dictionary.js` together in the same folder.
+2. Double-click `index.html` to open Notepad in Safari, Chrome, or another browser.
+
+## Use it
+
+- The **+** at the end of the tab bar creates a new note. Notes are saved automatically in this browser on this Mac.
+- **Open** opens one or more plain-text files (`.txt`, `.md`, or `.text`) as tabs.
+- **Save as** downloads the current note as a `.txt` file you can keep or share.
+- **Compare** lets you select two note tabs, edit both notes side by side, and saves edits automatically. Different lines are highlighted in both panes (left changes in red, right changes in green), and the highlights update as you edit.
+- The top bar uses compact icons for Open, Save as, Compare, and text wrapping; hover over an icon to see its label. **Plugins** is labeled.
+- **Wrap** controls whether long lines wrap at the edge of the editor.
+- Enable **MaltoEng (Malayalam)** under **Plugins → Input Methods**, or press **⌘M** on Mac / **Ctrl+M** on Windows. The **മ** button appears only while MaltoEng is enabled; click it or use the same shortcut to turn it off. Type a Romanized Malayalam word and press Space or punctuation to convert it to Malayalam script. The offline picker shows up to 10 matching dictionary words; if there are fewer, remaining choices are labeled **Letter** and offer alternate Malayalam letter/sound spellings. Choose by clicking, pressing **1–9** (or **0** for option 10), or using the arrow keys and Enter. Press **F2** to reopen choices for the last converted word.
+- **A−** and **A+** decrease or increase the editor and comparison text size. The chosen size is remembered.
+- Typing `(`, `[`, `{`, `"`, `'`, or a backtick automatically inserts its closing pair. Typing a closing character skips over its existing match; Backspace removes an empty pair.
+- **Plugins** opens the plugin manager. It contains MaltoEng under Input Methods and available formatters such as JSON and YAML. Formatters validate the note before changing it; invalid input is left unchanged. Choose **Develop a plugin…** in the menu for an in-app guide and example.
+- Double-click a tab name to rename it, or edit the note name above the editor.
+- Use **⌘N** for a new note, **⌘O** to open files, **⌘S** to download the current note, and **⌘W** to close its tab.
+- **⌘Tab** and **⌘⇧Tab** switch between note tabs.
+
+When used in a browser, notes are stored in that browser's local storage. Clearing browser data can remove them, so use **Save as** for important copies. To prepare the generated files when opening the HTML directly, run `npm ci`, `npm run build:formatters`, and `npm run build:manglish-dictionary`.
+
+MaltoEng suggestions use an offline Malayalam Hunspell wordlist from [Swathanthra Malayalam Computing](https://github.com/smc/smc/tree/master/spellcheck/hunspell-ml). Its source files and license notices are in `data/malayalam-hunspell/`; the browser-ready lookup file is `manglish-dictionary.js`. Regenerate that file after changing the source wordlist with `npm run build:manglish-dictionary`. The SMC wordlist is GPL-3.0-or-later; see the included `Copyright` and `GPL-3.0.txt` files. The macOS app bundle includes these notices and the source wordlist.
+
+## GitHub builds and publishing changes
+
+The **Build macOS and Windows apps** workflow builds both platforms in parallel on every push to `dev`, and can also be started manually from the **Actions** tab. Download the universal DMG/ZIP and Windows installer/portable `.exe` from the artifacts in that same workflow run.
+
+To run the Windows app locally for development, install Node.js 22 or later, then run `npm ci` and `npm run start:windows`. To build both Windows `.exe` packages locally from Windows, run `npm run build:windows`.
+
+Pushing a version tag starting with `v` from the tested `dev` branch runs the same workflow, builds both platforms, then publishes a GitHub Release containing the macOS `.dmg` and `.zip`, plus the Windows installer and portable `.exe`:
+
+```sh
+git checkout dev
+git pull origin dev
+git tag -a v1.0.1 -m "D-Writing-Pad 1.0.1"
+git push origin v1.0.1
+```
+
+Use the next unused version tag. GitHub Actions artifacts are temporary; the files attached to a published Release have stable public download URLs. The apps are not code-signed/notarized, so macOS Gatekeeper and Windows SmartScreen may display security warnings.
+
+Clone the existing `dev` branch (this avoids creating a branch before the repository has a commit):
+
+```sh
+git clone --branch dev https://github.com/dhaneshdlal/D-Writing-Pad.git
+cd D-Writing-Pad
+```
+
+After making and testing changes, publish them to `dev`:
+
+```sh
+git add <files-you-changed>
+git commit -m "Describe the change"
+git push origin dev
+```
+
+Do not add generated build output (`.build/`, `dist/`, `node_modules/`, generated icons, or generated JavaScript bundles) to Git; `.gitignore` excludes these files.
+
+## Disclaimer
+
+D-Writing-Pad is provided “as is”, without warranties of any kind, to the extent permitted by applicable law. Use it at your own risk. The developers and contributors are not liable for damage, data loss, or other loss resulting from installing, using, or being unable to use the application, except where liability cannot legally be excluded. Keep backups of important notes and files.
+
+### Plugin development
+
+A plugin is a JavaScript file registered after `app.js` has loaded. Formatter plugins provide a unique `id`, a visible `name`, and a `format(content)` function that returns formatted text:
+
+```js
+window.NotepadPlugins.register({
+  id: "trim-lines",
+  name: "Trim each line",
+  format(content) {
+    return content
+      .split("\n")
+      .map((line) => line.trim())
+      .join("\n");
+  },
+});
+```
+
+Input-method plugins provide `type: "input"` and `getSuggestions(word)`, returning choices with `kind`, `label`, and `value` properties. Selecting an input method in **Plugins** enables it; selecting it again disables it. MaltoEng is implemented this way in `manglish-plugin.js` and uses transliteration helpers from `manglish.js`.
+
+Add a script tag after `app.js` in `index.html`, then reload the app. The plugin appears in the **Plugins** manager. Keep plugins local and review code before loading; plugin code runs with the same page permissions as the app. For a distributable Mac build, add the plugin file to the resource copy list in `build-mac-app.sh`.
