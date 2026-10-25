@@ -14,6 +14,17 @@ The app bundle is built locally using the Swift compiler included with Xcode Com
 
 The script builds a universal app for Intel and Apple Silicon Macs running macOS 13 or later, then packages it in a compressed DMG with an Applications shortcut. Open the DMG and drag the app to Applications to install it. The app has native menu-bar commands and Open and Save dialogs; the About menu shows **Version 1.0**. Notes are stored on this Mac in the app's preferences. This local build is ad-hoc signed and is not notarized, so macOS may show a security warning when friends open it. Public distribution without that warning requires signing and notarization with an Apple Developer ID.
 
+### If macOS blocks the app
+
+The app is not signed with an Apple Developer ID or notarized by Apple. Only bypass Gatekeeper if you trust the source of the download. After you have tried opening the app and macOS blocks it:
+
+1. Open the Apple menu and choose **System Settings**.
+2. Select **Privacy & Security** in the sidebar. Scroll to the **Security** section.
+3. Click **Open Anyway** for D-Writing-Pad. This button is available for about an hour after the blocked launch attempt.
+4. Confirm **Open Anyway** in the prompt, then enter your Mac login password if requested.
+
+The override is a user choice, not an Apple verification of the app. If the **Open Anyway** button is not shown, try opening the app again, then return to **Privacy & Security**.
+
 The build script generates the offline formatter bundle, MaltoEng dictionary lookup, app's macOS icon (`AppIcon.icns`), and matching browser icon (`icon.png`). These generated files are not committed.
 
 ## Run it
@@ -74,6 +85,10 @@ git push origin dev
 ```
 
 Do not add generated build output (`.build/`, `dist/`, `node_modules/`, generated icons, or generated JavaScript bundles) to Git; `.gitignore` excludes these files.
+
+## Disclaimer
+
+D-Writing-Pad is provided “as is”, without warranties of any kind, to the extent permitted by applicable law. Use it at your own risk. The developers and contributors are not liable for damage, data loss, or other loss resulting from installing, using, or being unable to use the application, except where liability cannot legally be excluded. Keep backups of important notes and files.
 
 ### Plugin development
 
