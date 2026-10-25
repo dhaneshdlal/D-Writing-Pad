@@ -43,11 +43,11 @@ MaltoEng suggestions use an offline Malayalam Hunspell wordlist from [Swathanthr
 
 ## GitHub builds and publishing changes
 
-Every push to the `dev` branch runs the **Build macOS app** and **Build Windows app** workflows. Download the universal DMG or Windows installer/portable `.exe` from the relevant successful run under the repository's **Actions** tab (`D-Writing-Pad-macOS` or `D-Writing-Pad-Windows` artifact). You can also start either workflow manually from the Actions tab.
+The **Build macOS and Windows apps** workflow builds both platforms in parallel on every push to `dev`, and can also be started manually from the **Actions** tab. Download the universal DMG/ZIP and Windows installer/portable `.exe` from the artifacts in that same workflow run.
 
 To run the Windows app locally for development, install Node.js 22 or later, then run `npm ci` and `npm run start:windows`. To build both Windows `.exe` packages locally from Windows, run `npm run build:windows`.
 
-Pushing a version tag starting with `v` from the tested `dev` branch runs the release workflow. It builds both platforms and publishes a GitHub Release containing the macOS `.dmg` and `.zip`, plus the Windows installer and portable `.exe`:
+Pushing a version tag starting with `v` from the tested `dev` branch runs the same workflow, builds both platforms, then publishes a GitHub Release containing the macOS `.dmg` and `.zip`, plus the Windows installer and portable `.exe`:
 
 ```sh
 git checkout dev
