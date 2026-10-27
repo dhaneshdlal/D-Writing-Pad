@@ -8,8 +8,32 @@
     kadichu: "കടിച്ചു",
     malayalam: "മലയാളം",
     njan: "ഞാൻ",
+    njangal: "ഞങ്ങൾ",
+    ningal: "നിങ്ങൾ",
+    nammal: "നമ്മൾ",
+    nee: "നീ",
+    aanu: "ആണ്",
+    alla: "അല്ല",
+    alle: "അല്ലേ",
+    entha: "എന്താ",
+    enthu: "എന്ത്",
+    evide: "എവിടെ",
+    avide: "അവിടെ",
     ente: "എന്റെ",
+    ninte: "നിന്റെ",
     veedu: "വീട്",
+    amma: "അമ്മ",
+    achan: "അച്ഛൻ",
+    sugham: "സുഖം",
+    sukham: "സുഖം",
+    venam: "വേണം",
+    venda: "വേണ്ട",
+    pinne: "പിന്നെ",
+    pakshe: "പക്ഷേ",
+    cheythu: "ചെയ്തു",
+    paranju: "പറഞ്ഞു",
+    varum: "വരും",
+    poyi: "പോയി",
   };
 
   const wordDictionary = globalThis.MalayalamWordList ?? new Set();
@@ -50,7 +74,7 @@
     ["g", ["ഗ", "ഘ"]],
     ["c", ["ച", "ക"]],
     ["j", ["ജ", "ച"]],
-    ["t", ["ട", "ത"]],
+    ["t", ["ത", "ട"]],
     ["d", ["ദ", "ഡ", "ട"]],
     ["n", ["ന", "ണ"]],
     ["m", ["മ"]],
@@ -77,6 +101,10 @@
     ല: "ൽ",
     ള: "ൾ",
   };
+
+  function isStandaloneDeadConsonant(word) {
+    return /^[\u0D15-\u0D39]\u0D4D$/u.test(word);
+  }
 
   function tokenize(word) {
     const input = word.toLowerCase();
@@ -126,94 +154,32 @@
     return output + (pending ? finalConsonants[pending] ?? `${pending}്` : "");
   }
 
-  function getLetterAlternatives(word, base, rawDefault, words, limit) {
-    const tokens = tokenize(word);
-    const alternatives = [];
-    const seen = new Set();
-    const choices = new Map();
-    const changedLabels = [];
-    let visited = 0;
-
-    function visit(index) {
-      if (
-        alternatives.length >= limit ||
-        visited >= maximumCandidates ||
-        changedLabels.length > 2
-      ) return;
-      visited += 1;
-      if (index === tokens.length) {
-        const value = renderTokens(tokens, choices);
-        if (
-          changedLabels.length > 0 &&
-          value !== base &&
-          value !== rawDefault &&
-          !words.includes(value) &&
-          !wordDictionary.has(value) &&
-          !seen.has(value)
-        ) {
-          seen.add(value);
-          alternatives.push({
-            kind: "letter",
-            label: changedLabels.join(" + "),
-            value,
-          });
-        }
-        return;
-      }
-
-      const token = tokens[index];
-      const optionCount = token.type === "consonant"
-        ? token.values.length
-        : token.type === "vowel"
-          ? Math.max(token.independent.length, token.dependent.length)
-          : 1;
-
-      for (let choice = 0; choice < optionCount; choice += 1) {
-        if (choice === 0) {
-          visit(index + 1);
-          continue;
-        }
-        const label = token.type === "consonant"
-          ? token.values[choice]
-          : token.independent[choice] ?? token.dependent[choice];
-        if (!label) continue;
-        choices.set(index, choice);
-        changedLabels.push(label);
-        visit(index + 1);
-        changedLabels.pop();
-        choices.delete(index);
-        if (alternatives.length >= limit) return;
-      }
-    }
-
-    visit(0);
-    return alternatives;
-  }
-
   function expandTransliterations(word) {
-    let states = [{ output: "", pending: "" }];
-    for (const [tokenIndex, token] of tokenize(word).entries()) {
+    let states = [{ output: "", pending: "", score: 0 }];
+    for (const token of tokenize(word)) {
       const nextStates = [];
       for (const state of states) {
         if (token.type === "consonant") {
           const prefix = state.pending ? `${state.output}${state.pending}്` : state.output;
-          for (const value of token.values) {
-            nextStates.push({ output: prefix, pending: value });
-          }
+          token.values.forEach((value, choice) => {
+            nextStates.push({ output: prefix, pending: value, score: state.score + choice });
+          });
         } else if (token.type === "vowel") {
           const forms = state.pending
             ? token.dependent
             : token.independent;
-          for (const form of forms) {
+          forms.forEach((form, choice) => {
             nextStates.push({
               output: state.output + (state.pending ? state.pending + form : form),
               pending: "",
+              score: state.score + choice,
             });
-          }
+          });
         } else {
           nextStates.push({
             output: state.output + (state.pending || "") + token.value,
             pending: "",
+            score: state.score,
           });
         }
       }
@@ -221,10 +187,12 @@
       const unique = new Map();
       for (const state of nextStates) {
         const key = `${state.output}\u0000${state.pending}`;
-        if (!unique.has(key)) unique.set(key, state);
-        if (unique.size >= maximumCandidates) break;
+        const previous = unique.get(key);
+        if (!previous || state.score < previous.score) unique.set(key, state);
       }
-      states = [...unique.values()];
+      states = [...unique.values()]
+        .sort((left, right) => left.score - right.score)
+        .slice(0, maximumCandidates);
     }
 
     return states.map(({ output, pending }) => (
@@ -243,18 +211,15 @@
   function getSuggestions(word) {
     const preferredWord = wordSuggestions[word.toLowerCase()];
     const variants = expandTransliterations(word);
-    const dictionaryWords = [...new Set(variants.filter((candidate) => wordDictionary.has(candidate)))];
+    const dictionaryWords = [...new Set(variants.filter(
+      (candidate) => wordDictionary.has(candidate) && !isStandaloneDeadConsonant(candidate),
+    ))];
     const words = [
       ...(preferredWord ? [preferredWord] : []),
       ...dictionaryWords,
     ].filter((candidate, index, all) => all.indexOf(candidate) === index).slice(0, 10);
 
-    const options = words.map((value) => ({ kind: "word", label: value, value }));
-    if (options.length >= 10) return options;
-
-    const base = preferredWord ?? variants[0];
-    options.push(...getLetterAlternatives(word, base, variants[0], words, 10 - options.length));
-    return options;
+    return words.map((value) => ({ kind: "word", label: value, value }));
   }
 
   globalThis.ManglishTransliterator = Object.freeze({ getSuggestions, toMalayalam });
