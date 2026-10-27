@@ -49,6 +49,7 @@ The build script generates the offline formatter bundle, MaltoEng dictionary loo
 - The **+** at the end of the tab bar creates a new note. Notes are saved automatically in this browser on this Mac.
 - **Open** opens one or more plain-text files (`.txt`, `.md`, or `.text`) as tabs.
 - **Save as** downloads the current note as a `.txt` file you can keep or share.
+- **Find and replace** searches the current note with next/previous navigation, optional case matching, replace, and replace all. Open it with the toolbar search button or **⌘F** / **Ctrl+F**.
 - **Compare** lets you select two note tabs, edit both notes side by side, and saves edits automatically. Different lines are highlighted in both panes (left changes in red, right changes in green), and the highlights update as you edit.
 - The top bar uses compact icons for Open, Save as, Compare, and text wrapping; hover over an icon to see its label. **Plugins** is labeled.
 - **Wrap** controls whether long lines wrap at the edge of the editor.

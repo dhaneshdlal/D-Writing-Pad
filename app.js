@@ -14,6 +14,16 @@ const lineCount = document.querySelector("#line-count");
 const characterCount = document.querySelector("#character-count");
 const toast = document.querySelector("#toast");
 const workspace = document.querySelector(".workspace");
+const findButton = document.querySelector("#find-button");
+const findPanel = document.querySelector("#find-panel");
+const findInput = document.querySelector("#find-input");
+const replaceInput = document.querySelector("#replace-input");
+const findCount = document.querySelector("#find-count");
+const findPreviousButton = document.querySelector("#find-previous-button");
+const findNextButton = document.querySelector("#find-next-button");
+const replaceButton = document.querySelector("#replace-button");
+const replaceAllButton = document.querySelector("#replace-all-button");
+const findCaseSensitive = document.querySelector("#find-case-sensitive");
 const compareControls = document.querySelector("#compare-controls");
 const compareSelectedButton = document.querySelector("#compare-selected-button");
 const compareHint = document.querySelector("#compare-hint");
@@ -49,6 +59,111 @@ let lastManglishConversion = null;
 const plugins = new Map();
 let saveTimer;
 let toastTimer;
+
+function findPattern(query = findInput.value) {
+  if (!query) return null;
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+  return new RegExp(escaped, findCaseSensitive.checked ? "gu" : "giu");
+}
+
+function getFindMatches() {
+  const pattern = findPattern();
+  return pattern ? [...editor.value.matchAll(pattern)] : [];
+}
+
+function updateFindCount(matches = getFindMatches()) {
+  const selectedStart = editor.selectionStart;
+  const selectedEnd = editor.selectionEnd;
+  const activeIndex = matches.findIndex(
+    (match) => match.index === selectedStart && match.index + match[0].length === selectedEnd,
+  );
+  findCount.textContent = matches.length === 0
+    ? "0 matches"
+    : activeIndex < 0
+      ? `${matches.length} ${matches.length === 1 ? "match" : "matches"}`
+      : `${activeIndex + 1} of ${matches.length}`;
+  replaceButton.disabled = matches.length === 0;
+  replaceAllButton.disabled = matches.length === 0;
+  findPreviousButton.disabled = matches.length === 0;
+  findNextButton.disabled = matches.length === 0;
+}
+
+function selectFindMatch(match, keepFindFocus = false) {
+  editor.setSelectionRange(match.index, match.index + match[0].length);
+  if (keepFindFocus) findInput.focus();
+  updateFindCount();
+}
+
+function findMatch(direction = 1, keepFindFocus = false) {
+  const matches = getFindMatches();
+  if (matches.length === 0) {
+    updateFindCount(matches);
+    return false;
+  }
+
+  const selectionStart = editor.selectionStart;
+  const selectionEnd = editor.selectionEnd;
+  let match;
+  if (direction > 0) {
+    match = matches.find((item) => item.index >= selectionEnd) ?? matches[0];
+  } else {
+    match = [...matches].reverse().find((item) => item.index + item[0].length <= selectionStart)
+      ?? matches[matches.length - 1];
+  }
+  selectFindMatch(match, keepFindFocus);
+  return true;
+}
+
+function openFindPanel() {
+  findPanel.hidden = false;
+  findButton.setAttribute("aria-pressed", "true");
+  const selection = editor.value.slice(editor.selectionStart, editor.selectionEnd);
+  if (selection) findInput.value = selection;
+  findInput.focus();
+  findInput.select();
+  if (findInput.value) findMatch(1, true);
+  else updateFindCount([]);
+}
+
+function closeFindPanel() {
+  findPanel.hidden = true;
+  findButton.setAttribute("aria-pressed", "false");
+  editor.focus();
+}
+
+function replaceCurrentMatch() {
+  const matches = getFindMatches();
+  const selectedMatch = matches.find(
+    (match) => match.index === editor.selectionStart &&
+      match.index + match[0].length === editor.selectionEnd,
+  );
+  if (!selectedMatch && !findMatch()) return;
+
+  const start = editor.selectionStart;
+  const end = editor.selectionEnd;
+  editor.setRangeText(replaceInput.value, start, end, "select");
+  editor.dispatchEvent(new Event("input", { bubbles: true }));
+  findMatch(1);
+}
+
+function replaceAllMatches() {
+  const pattern = findPattern();
+  if (!pattern) {
+    updateFindCount([]);
+    return;
+  }
+  const matches = [...editor.value.matchAll(pattern)];
+  if (matches.length === 0) {
+    updateFindCount(matches);
+    return;
+  }
+
+  const replacement = editor.value.replace(pattern, () => replaceInput.value);
+  editor.value = replacement;
+  editor.setSelectionRange(0, 0);
+  editor.dispatchEvent(new Event("input", { bubbles: true }));
+  findMatch(1);
+}
 
 function loadWrapPreference() {
   if (typeof window.__nativeWrapText === "boolean") return window.__nativeWrapText;
@@ -738,6 +853,29 @@ function showManglishSuggestions(suggestions, start, end) {
 
 document.querySelector("#open-button").addEventListener("click", openFiles);
 document.querySelector("#save-button").addEventListener("click", saveActiveNote);
+findButton.addEventListener("click", () => {
+  if (findPanel.hidden) openFindPanel();
+  else findInput.focus();
+});
+findPreviousButton.addEventListener("click", () => findMatch(-1));
+findNextButton.addEventListener("click", () => findMatch(1));
+replaceButton.addEventListener("click", replaceCurrentMatch);
+replaceAllButton.addEventListener("click", replaceAllMatches);
+findInput.addEventListener("input", () => findMatch(1, true));
+findCaseSensitive.addEventListener("change", () => {
+  if (findInput.value) findMatch(1, true);
+  else updateFindCount([]);
+});
+findInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    findMatch(event.shiftKey ? -1 : 1, true);
+  } else if (event.key === "Escape") {
+    event.preventDefault();
+    closeFindPanel();
+  }
+});
+document.querySelector("#find-close-button").addEventListener("click", closeFindPanel);
 document.querySelector("#compare-button").addEventListener("click", () => {
   if (workspace.classList.contains("comparing")) {
     finishComparison();
@@ -852,6 +990,9 @@ editor.addEventListener("input", (event) => {
   getActiveNote().content = editor.value;
   updateEditorDetails();
   scheduleSave();
+});
+editor.addEventListener("input", () => {
+  if (!findPanel.hidden) updateFindCount();
 });
 editor.addEventListener("click", updateEditorDetails);
 editor.addEventListener("keyup", updateEditorDetails);
@@ -994,7 +1135,11 @@ document.addEventListener("keydown", (event) => {
   const modifier = event.metaKey || event.ctrlKey;
   if (!modifier) return;
 
-  if (event.key.toLowerCase() === "m") {
+  if (event.key.toLowerCase() === "f") {
+    event.preventDefault();
+    if (findPanel.hidden) openFindPanel();
+    else closeFindPanel();
+  } else if (event.key.toLowerCase() === "m") {
     event.preventDefault();
     toggleManglishInput();
   } else if (event.key.toLowerCase() === "n") {
@@ -1006,6 +1151,9 @@ document.addEventListener("keydown", (event) => {
   } else if (event.key.toLowerCase() === "s") {
     event.preventDefault();
     saveActiveNote();
+  } else if (event.key.toLowerCase() === "g" && findPanel.hidden === false) {
+    event.preventDefault();
+    findMatch(event.shiftKey ? -1 : 1);
   } else if (event.key.toLowerCase() === "w") {
     event.preventDefault();
     closeNote(activeNoteId);

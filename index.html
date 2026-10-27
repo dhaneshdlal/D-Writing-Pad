@@ -23,6 +23,9 @@
             <button class="toolbar-icon" id="save-button" type="button" aria-label="Save as" title="Save as (⌘S)">
               <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.5v9"/><path d="m6.5 8 3.5 3.5L13.5 8"/><path d="M3.5 12.5v4h13v-4"/></svg>
             </button>
+            <button class="toolbar-icon" id="find-button" type="button" aria-label="Find and replace" title="Find and replace (⌘F)">
+              <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m12.5 12.5 4 4"/></svg>
+            </button>
             <button class="toolbar-icon" id="compare-button" type="button" aria-label="Compare notes" title="Compare notes">
               <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M9 3.5H4a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h5"/><path d="M11 3.5h5a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1h-5"/><path d="M10 2.5v15"/></svg>
             </button>
@@ -91,6 +94,30 @@
             <span id="save-message">Saved on this Mac</span>
           </span>
         </div>
+        <section class="find-panel" id="find-panel" aria-label="Find and replace" hidden>
+          <div class="find-row">
+            <label class="find-field">
+              <span class="find-field-label">Find</span>
+              <input id="find-input" type="search" autocomplete="off" spellcheck="false" />
+            </label>
+            <button class="button button-subtle find-nav-button" id="find-previous-button" type="button" aria-label="Previous match" title="Previous match (Shift+Enter)">↑</button>
+            <button class="button button-subtle find-nav-button" id="find-next-button" type="button" aria-label="Next match" title="Next match (Enter)">↓</button>
+            <span class="find-count" id="find-count" aria-live="polite">0 matches</span>
+            <button class="toolbar-icon find-close-button" id="find-close-button" type="button" aria-label="Close find and replace" title="Close">×</button>
+          </div>
+          <div class="find-row find-replace-row">
+            <label class="find-field">
+              <span class="find-field-label">Replace</span>
+              <input id="replace-input" type="text" autocomplete="off" spellcheck="false" />
+            </label>
+            <button class="button button-subtle" id="replace-button" type="button">Replace</button>
+            <button class="button button-subtle" id="replace-all-button" type="button">Replace all</button>
+            <label class="find-case-option">
+              <input id="find-case-sensitive" type="checkbox" />
+              <span>Match case</span>
+            </label>
+          </div>
+        </section>
         <div class="editor-wrap">
           <div class="line-numbers" id="line-numbers" aria-hidden="true">1</div>
           <textarea
